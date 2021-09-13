@@ -275,7 +275,7 @@
     document.getElementsByTagName("body")[0].classList.add("loading");
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
-    xhr.open('GET', 'logs/' + dir + '/result.json');
+    xhr.open('GET', `logs/${dir}/result.json`);
     xhr.onreadystatechange = function() {
       if(xhr.readyState !== XMLHttpRequest.DONE) return;
       if(xhr.status !== 200) {
@@ -311,6 +311,7 @@
       load(ev.currentTarget.value);
     });
     document.getElementById("available-runs").appendChild(s);
+    load(s.value);
   };
   xhr.send();
 })();
