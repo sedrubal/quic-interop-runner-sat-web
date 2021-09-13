@@ -2,6 +2,7 @@
 
 (function() {
   "use strict";
+  const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
   const map = { client: {}, server: {}, test: {} };
   const color_type = { succeeded: "success", unsupported: "secondary disabled", failed: "danger"};
 
@@ -275,7 +276,7 @@
     document.getElementsByTagName("body")[0].classList.add("loading");
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
-    xhr.open('GET', `logs/${dir}/result.json`);
+    xhr.open('GET', `${LOGS_BASE_URL}logs/${dir}/result.json`);
     xhr.onreadystatechange = function() {
       if(xhr.readyState !== XMLHttpRequest.DONE) return;
       if(xhr.status !== 200) {
@@ -293,7 +294,7 @@
   // enable loading of old runs
   var xhr = new XMLHttpRequest();
   xhr.responseType = 'json';
-  xhr.open('GET', 'logs/logs.json');
+  xhr.open('GET', `${LOGS_BASE_URL}logs/logs.json`);
   xhr.onreadystatechange = function() {
     if(xhr.readyState !== XMLHttpRequest.DONE) return;
     if(xhr.status !== 200) {
