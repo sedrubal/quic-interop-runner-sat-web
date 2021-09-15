@@ -81,12 +81,12 @@
     return row;
   }
 
-  function fillInteropTable(result) {
+  function fillInteropTable(result, log_dir) {
     var index = 0;
     var appendResult = function(el, res, i, j) {
       result.results[index].forEach(function(item) {
         if(item.result !== res) return;
-        el.appendChild(getLogLink(result.log_dir, result.servers[j], result.clients[i], item.name, item.abbr, res));
+        el.appendChild(getLogLink(log_dir, result.servers[j], result.clients[i], item.name, item.abbr, res));
       });
     };
 
@@ -107,7 +107,7 @@
     }
   }
 
-  function fillMeasurementTable(result) {
+  function fillMeasurementTable(result, log_dir) {
     var t = document.getElementById("measurements");
     t.innerHTML = "";
     makeColumnHeaders(t, result);
@@ -121,7 +121,7 @@
         cell.className = `server-${result.servers[j]} client-${result.clients[i]}`;
         for(var k = 0; k < res.length; k++) {
           var measurement = res[k];
-          var link = getLogLink(result.log_dir, result.servers[j], result.clients[i], measurement.name, measurement.abbr, measurement.result);
+          var link = getLogLink(log_dir, result.servers[j], result.clients[i], measurement.name, measurement.abbr, measurement.result);
           if (!measurement.result) {
             continue;
           }
@@ -233,7 +233,7 @@
     return "<strong>" + name + "</strong>" + (desc === undefined ? "" : "<br>" + desc);
   }
 
-  function process(result) {
+  function process(result, log_dir) {
     var startTime = new Date(1000*result.start_time);
     var endTime = new Date(1000*result.end_time);
     var duration = result.end_time - result.start_time;
@@ -243,8 +243,8 @@
     document.getElementById("quic-vers").innerHTML =
       "<tt>" + result.quic_version + "</tt> (\"draft-" + result.quic_draft + "\")";
 
-    fillInteropTable(result);
-    fillMeasurementTable(result);
+    fillInteropTable(result, log_dir);
+    fillMeasurementTable(result, log_dir);
 
     $("#client").add("#server").add("#test").empty();
     $("#client").append(result.clients.map(e => makeButton("client", e)));
@@ -283,7 +283,7 @@
         console.log("Received status: ", xhr.status);
         return;
       }
-      process(xhr.response);
+      process(xhr.response, dir);
       document.getElementsByTagName("body")[0].classList.remove("loading");
     };
     xhr.send();
