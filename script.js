@@ -15,31 +15,46 @@
     ].join(":").replace(/\b(\d)\b/g, "0$1");
   }
 
-  function getLogLink(log_dir, server, client, test, text, res) {
-    var ttip = "<b>Test:</b> " + test + "<br>" +
-               "<b>Client:</b> " + client + "<br>" +
-               "<b>Server:</b> " + server + "<br>" +
-               "<b>Result: <span class=\"text-" + color_type[res] + "\">" + res + "</span></b>";
+  function getLogLink(type, log_dir, server, client, test_result, test_desc) {
+    var ttip = `
+      <b>Test:</b> ${test_desc.name}<br/>
+      <b>Client:</b> ${client}<br/>
+      <b>Server:</b> ${server}<br/>
+      <b>Result: <span class="text-${color_type[test_result.result]}">${test_result.result}</span></b>
+    `;
 
-    var a = document.createElement("a");
-    a.className = "btn btn-xs btn-" + color_type[res] + " " + res + " test-" + text.toLowerCase();
-    var ttip_target = a;
-    if (res !== "unsupported") {
-      a.href = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test}/index.html`;
-      a.target = "_blank";
-      ttip += "<br><br>(Click for logs.)";
+    var btn = document.createElement("a");
+    btn.className = `btn btn-xs btn-${color_type[test_result.result]} ${test_result.result} test-${test_result.abbr.toLowerCase()}`;
+    if (type === "measurement" && test_result.result === "succeeded") {
+      try {
+        const rating = Number.parseInt(test_result.details.split(" ")[0]) / (test_desc.theoretical_max_value || 20000);
+        const adaptedRating = Math.min(1, rating * 2);
+
+        ttip += `<br/><b>Efficiency:</b> <span class="calc-rating rating-color" style="--rating: ${adaptedRating};">${(rating * 100).toFixed(0)} %</span>`;
+
+        btn.style.setProperty("--rating", adaptedRating);
+        btn.className += " calc-rating btn-rating"
+      } catch (e) {
+        console.error("Measurement details did not parse:", test_result.details);
+      }
+    }
+    var ttip_target = btn;
+    if (test_result.result !== "unsupported") {
+      const log_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/index.html`;
+      btn.href = log_url;
+      btn.target = "_blank"
     } else {
       var s = document.createElement("span");
       s.className = "d-inline-block";
       s.tabIndex = 0;
-      a.style = "pointer-events: none;";
-      s.appendChild(a);
+      btn.style = "pointer-events: none;";
+      s.appendChild(btn);
       ttip_target = s;
     }
     ttip_target.title = ttip;
-    $(ttip_target).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip();
+    $(ttip_target).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip({sanitize: false});
     $(ttip_target).click(function() { $(this).blur(); });
-    a.appendChild(document.createTextNode(text));
+    btn.appendChild(document.createTextNode(test_result.abbr));
     return ttip_target;
   }
 
@@ -84,9 +99,18 @@
   function fillInteropTable(result, log_dir) {
     var index = 0;
     var appendResult = function(el, res, i, j) {
-      result.results[index].forEach(function(item) {
-        if(item.result !== res) return;
-        el.appendChild(getLogLink(log_dir, result.servers[j], result.clients[i], item.name, item.abbr, res));
+      result.results[index].forEach(function(test_result) {
+        if(test_result.result !== res) return;
+        el.appendChild(
+          getLogLink(
+            "testcase",
+            log_dir,
+            result.servers[j],
+            result.clients[i],
+            test_result,
+            result.tests[test_result.abbr],
+          )
+        );
       });
     };
 
@@ -98,7 +122,7 @@
       var row = makeRowHeader(tbody, result, i);
       for(var j = 0; j < result.servers.length; j++) {
         var cell = row.insertCell(j+1);
-        cell.className = "server-" + result.servers[j] + " client-" + result.clients[i];
+        cell.className = `server-${result.servers[j]} client-${result.clients[i]}`;
         appendResult(cell, "succeeded", i, j);
         appendResult(cell, "unsupported", i, j);
         appendResult(cell, "failed", i, j);
@@ -120,13 +144,22 @@
         var cell = row.insertCell(j+1);
         cell.className = `server-${result.servers[j]} client-${result.clients[i]}`;
         for(var k = 0; k < res.length; k++) {
-          var measurement = res[k];
-          var link = getLogLink(log_dir, result.servers[j], result.clients[i], measurement.name, measurement.abbr, measurement.result);
-          if (!measurement.result) {
+          const meas_result = res[k];
+          const measurement = result.tests[meas_result.abbr];
+          if (!meas_result.result) {
             continue;
           }
-          if (measurement.result === "succeeded")
-              link.innerHTML += ": " + measurement.details;
+          var link = getLogLink(
+            "measurement",
+            log_dir,
+            result.servers[j],
+            result.clients[i],
+            meas_result,
+            measurement,
+          );
+          if (meas_result.result === "succeeded") {
+              link.innerHTML += ": " + meas_result.details;
+          }
           cell.appendChild(link);
         }
         index++;
@@ -249,9 +282,9 @@
     $("#client").add("#server").add("#test").empty();
     $("#client").append(result.clients.map(e => makeButton("client", e)));
     $("#server").append(result.servers.map(e => makeButton("server", e)));
-    if (result.hasOwnProperty("tests"))
+    if (result.hasOwnProperty("tests")) {
       $("#test").append(Object.keys(result.tests).map(e => makeButton("test", e, makeTooltip(result.tests[e].name, result.tests[e].desc))));
-    else {
+    } else {
       // TODO: this else can eventually be removed, when all past runs have the test descriptions in the json
       const tcases = result.results.concat(result.measurements).flat().map(x => [x.abbr, x.name]).filter((e, i, a) => a.map(x => x[0]).indexOf(e[0]) === i);
       $("#test").append(tcases.map(e => makeButton("test", e[0], makeTooltip(e[1]))));
