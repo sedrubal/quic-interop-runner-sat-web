@@ -27,7 +27,7 @@
     btn.className = `btn btn-xs btn-${color_type[test_result.result]} ${test_result.result} test-${test_result.abbr.toLowerCase()}`;
     if (type === "measurement" && test_result.result === "succeeded") {
       try {
-        const rating = Number.parseInt(test_result.details.split(" ")[0]) / (test_desc.theoretical_max_value || 20000);
+        const rating = Number.parseInt(test_result.details.split(" ")[0]) / test_desc.theoretical_max_value;
         const adaptedRating = Math.min(1, rating * 2);
 
         ttip += `<br/><b>Efficiency:</b> <span class="calc-rating rating-color" style="--rating: ${adaptedRating};">${(rating * 100).toFixed(0)} %</span>`;
