@@ -148,6 +148,9 @@
         var res = result.measurements[index];
         var cell = row.insertCell(j+1);
         cell.className = `server-${result.servers[j]} client-${result.clients[i]}`;
+        const btnGroup = document.createElement('div');
+        btnGroup.className = "btn-group-vertical";
+        cell.appendChild(btnGroup);
         for(var k = 0; k < res.length; k++) {
           const meas_result = res[k];
           const measurement = result.tests[meas_result.abbr];
@@ -165,7 +168,7 @@
           if (meas_result.result === "succeeded") {
               link.innerHTML += ": " + meas_result.details;
           }
-          cell.appendChild(link);
+          btnGroup.appendChild(link);
         }
         index++;
       }
@@ -242,21 +245,24 @@
   function createEffCell(effsByMeas, className) {
     var cell = document.createElement("th");
     cell.className = `table-light eff-cell ${className}`;
+    const btnGroup = document.createElement('div');
+    btnGroup.className = "btn-group-vertical";
+    cell.appendChild(btnGroup);
     Object.entries(effsByMeas).forEach(([abbr, effs]) => {
       const avgEff = effs.reduce((acc, cur) => acc + cur, 0) / effs.length;
       const badge = document.createElement("span");
       var avgEffStr = "";
       if (isNaN(avgEff)) {
         avgEffStr = "-";
-        badge.className = `badge badge-secondary test-${abbr.toLowerCase()}`;
+        badge.className = `btn btn-xs badge-secondary test-${abbr.toLowerCase()}`;
       } else {
         avgEffStr = `${((avgEff) * 100).toFixed(0)} %`;
-        badge.className = `badge calc-rating btn-rating test-${abbr.toLowerCase()}`;
+        badge.className = `btn btn-xs calc-rating btn-rating test-${abbr.toLowerCase()}`;
         const adaptedRating = Math.min(1, avgEff * 2);
         badge.style.setProperty("--rating", adaptedRating);
       }
       badge.innerHTML = `${abbr}: ${avgEffStr}`;
-      cell.appendChild(badge);
+      btnGroup.appendChild(badge);
     });
     return cell;
   }
