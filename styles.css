@@ -48,6 +48,7 @@ tr.hover-xy > th, th.hover-xy {
 .calc-rating.btn-rating {
   background-color: var(--rating-color);
   border-color: var(--rating-color);
+  color: #fff;
 }
 .calc-rating.rating-color {
   color: var(--rating-color);

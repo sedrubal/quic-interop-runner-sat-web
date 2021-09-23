@@ -2,7 +2,10 @@
 
 (function() {
   "use strict";
-  const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
+  // const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
+  const LOGS_BASE_URL = "";
+  // const INDEX = "index.html";
+  const INDEX = "";
   const map = { client: {}, server: {}, test: {} };
   const color_type = { succeeded: "success", unsupported: "secondary disabled", failed: "danger"};
 
@@ -40,7 +43,7 @@
     }
     var ttip_target = btn;
     if (test_result.result !== "unsupported") {
-      const log_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/index.html`;
+      const log_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${INDEX}`;
       btn.href = log_url;
       btn.target = "_blank"
     } else {
@@ -65,8 +68,9 @@
   }
 
   function makeColumnHeaders(t, result) {
-    for(var i = 0; i <= result.servers.length; i++)
+    for(var i = 0; i <= result.servers.length + 1; i++) {
       t.appendChild(document.createElement("colgroup"));
+    }
     var thead = t.createTHead();
     var row = thead.insertRow(0);
     var cell = document.createElement("th");
@@ -139,6 +143,7 @@
     var index = 0;
     for(var i = 0; i < result.clients.length; i++) {
       var row = makeRowHeader(tbody, result, i);
+      row.className = `row-${result.clients[i]}`;
       for(var j = 0; j < result.servers.length; j++) {
         var res = result.measurements[index];
         var cell = row.insertCell(j+1);
@@ -165,6 +170,95 @@
         index++;
       }
     }
+    // add efficiency row and col
+    // collect efficiencies
+    var effsByCombi = result.servers.map(() => result.clients.map(() => null));
+    for (var c = 0; c < result.clients.length; c++) {
+      for (var s = 0; s < result.servers.length; s++) {
+        var measResults = result.measurements[c * result.servers.length + s];
+        var effsForCombi = {}
+        measResults.forEach((measResult) => {
+          if (measResult.result == "succeeded") {
+            const eff = Number.parseInt(measResult.details.split(" ")[0]) / result.tests[measResult.abbr].theoretical_max_value;
+            effsForCombi[measResult.abbr] = eff;
+          }
+        });
+        effsByCombi[s][c] = effsForCombi;
+      }
+    }
+
+    // create html elements
+
+    // calculate avg effs for servers
+    const effRow = document.createElement("tr");
+    effRow.className = "eff-row";
+    tbody.appendChild(effRow);
+    var cell = document.createElement("th");
+    cell.scope = "row";
+    cell.className = "table-light eff-title";
+    cell.innerHTML = "Avg. Efficiency";
+    effRow.appendChild(cell);
+
+    for (var s = 0; s < result.servers.length; s++) {
+      var serverEffsByMeas = {};
+      for (var c = 0; c < result.clients.length; c++) {
+        const effForCombi = effsByCombi[s][c];
+        Object.entries(effForCombi).forEach(([abbr, eff]) => {
+          const serverEffsForMeas = serverEffsByMeas[abbr] || [];
+          serverEffsForMeas.push(eff);
+          serverEffsByMeas[abbr] = serverEffsForMeas;
+        });
+      }
+      var cell = createEffCell(serverEffsByMeas, `server-${result.servers[s]}`)
+      effRow.appendChild(cell);
+    }
+    // add right lower cell
+    cell = document.createElement("th");
+    cell.className = "table-light eff-title";
+    effRow.appendChild(cell);
+
+    // calculate avg effs for clients
+    cell = document.createElement("th");
+    cell.scope = "col";
+    cell.className = "table-light eff-title";
+    cell.innerHTML = "Avg. Efficiency";
+    t.tHead.querySelector('tr').appendChild(cell);
+
+    for (var c = 0; c < result.clients.length; c++) {
+      var clientEffsByMeas = {};
+      for (var s = 0; s < result.servers.length; s++) {
+        const effForCombi = effsByCombi[s][c];
+        Object.entries(effForCombi).forEach(([abbr, eff]) => {
+          const clientEffsForMeas = clientEffsByMeas[abbr] || [];
+          clientEffsForMeas.push(eff);
+          clientEffsByMeas[abbr] = clientEffsForMeas;
+        });
+      }
+      var cell = createEffCell(clientEffsByMeas, `client-${result.clients[c]}`)
+      tbody.querySelector(`.row-${result.clients[c]}`).appendChild(cell);
+    }
+  }
+
+  function createEffCell(effsByMeas, className) {
+    var cell = document.createElement("th");
+    cell.className = `table-light eff-cell ${className}`;
+    Object.entries(effsByMeas).forEach(([abbr, effs]) => {
+      const avgEff = effs.reduce((acc, cur) => acc + cur, 0) / effs.length;
+      const badge = document.createElement("span");
+      var avgEffStr = "";
+      if (isNaN(avgEff)) {
+        avgEffStr = "-";
+        badge.className = `badge badge-secondary test-${abbr.toLowerCase()}`;
+      } else {
+        avgEffStr = `${((avgEff) * 100).toFixed(0)} %`;
+        badge.className = `badge calc-rating btn-rating test-${abbr.toLowerCase()}`;
+        const adaptedRating = Math.min(1, avgEff * 2);
+        badge.style.setProperty("--rating", adaptedRating);
+      }
+      badge.innerHTML = `${abbr}: ${avgEffStr}`;
+      cell.appendChild(badge);
+    });
+    return cell;
   }
 
   function dateToString(date) {
@@ -202,10 +296,12 @@
       show[type] = map[type].map(e => "." + type + "-" + e);
     });
 
-    $(".result td").add(".result th").add(".result td a").hide();
+    $(".result td").add(".result th").add(".result td .btn").add(".result th .badge").not('.eff-title').hide();
 
     const show_classes = show.client.map(el1 => show.server.map(el2 => el1 + el2)).flat().join();
     $(".client-any," + show_classes).show();
+    $(show.server.map((serverCls) => `.eff-cell${serverCls}`).join(",")).show();
+    $(show.client.map((clientCls) => `.eff-cell${clientCls}`).join(",")).show();
 
     $(".result " + show.client.map(e => "th" + e).join()).show();
     $(".result " + show.server.map(e => "th" + e).join()).show();
@@ -297,10 +393,12 @@
           $(this).parent().addClass("hover-xy");
           t.children("colgroup").eq($(this).index()).addClass("hover-xy");
           t.find("th").eq($(this).index()).addClass("hover-xy");
+          t.find(".eff-row th").eq($(this).index()).addClass("hover-xy");
         } else {
           $(this).parent().removeClass("hover-xy");
           t.children("colgroup").eq($(this).index()).removeClass("hover-xy");
           t.find("th").eq($(this).index()).removeClass("hover-xy");
+          t.find(".eff-row th").eq($(this).index()).removeClass("hover-xy");
         }
     });
   }
