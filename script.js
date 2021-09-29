@@ -4,7 +4,7 @@
   "use strict";
   // const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
   // const LOGS_BASE_URL = "https://interop.sedrubal.de/";
-  const LOGS_BASE_URL = window.location.href;
+  const LOGS_BASE_URL = window.location.href.split('?')[0];
   // const INDEX = "index.html";
   const INDEX = "";
   const QVIS_BASE_URL = "https://qvis.quictools.info/";

@@ -4,6 +4,9 @@ body.loading .navbar-nav .duration,
 body.loading .navbar-nav .end-time {
   opacity: 0.3;
 }
+body.loading {
+  cursor: wait;
+}
 
 .btn-xs {
   margin: 0 .1rem .1rem 0;
