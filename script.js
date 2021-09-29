@@ -54,18 +54,23 @@
         <a class="btn btn-sm btn-secondary" href="${log_url}" target="_blank">Open Logs</a>`;
       if (test_result.result == "succeeded") {
         if (type == "testcase") {
+          const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
+          const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/client.qlog`;
           const qvis_url = `${QVIS_BASE_URL}#/files?list=${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
-          ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog in qvis</a>`;
+          ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog in qvis*</a>`;
         } else {
           for (let i = 1, len = test_desc.repetitions || 1; i <= len; i++) {
             const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/server.qlog`;
             const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/client.qlog`;
-            const qvis_url = `${QVIS_BASE_URL}#?list=${qlog_server_url}&list=${qlog_client_url}`;
-            ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog #${i} in qvis</a>`;
+            const qvis_url = `${QVIS_BASE_URL}#?file1=${qlog_server_url}&file2=${qlog_client_url}`;
+            ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog #${i} in qvis*</a>`;
           }
         }
       }
       ttip += `</div></p>`;
+      if (test_result.result == "succeeded") {
+        ttip += '<small><i class="text-muted">*qlog files may not exist</i></small>';
+      }
     } else {
       var s = document.createElement("span");
       s.className = "d-inline-block";
@@ -74,11 +79,11 @@
       s.appendChild(btn);
       ttip_target = s;
     }
-    ttip_target.title = ttip;
     $(ttip_target)
       .attr("data-toggle", "popover")
       .attr("data-placement", "bottom")
       .attr("data-trigger", "click")
+      .attr("data-content", ttip)
       .attr("data-html", true)
       .popover({sanitize: false})
       .on('show.bs.popover', function(evt) {
