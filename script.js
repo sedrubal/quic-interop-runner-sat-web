@@ -50,27 +50,27 @@
       btn.href = log_url;
       btn.target = "_blank"
       // popover
-      ttip += `<p><div class="btn-group-vertical">
+      ttip += `<p><div class="btn-group-vertical w-100">
         <a class="btn btn-sm btn-secondary" href="${log_url}" target="_blank">Open Logs</a>`;
-      if (test_result.result == "succeeded") {
-        if (type == "testcase") {
-          const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
-          const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/client.qlog`;
-          const qvis_url = `${QVIS_BASE_URL}#/files?list=${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
-          ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog in qvis*</a>`;
-        } else {
-          for (let i = 1, len = test_desc.repetitions || 1; i <= len; i++) {
-            const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/server.qlog`;
-            const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/client.qlog`;
-            const qvis_url = `${QVIS_BASE_URL}#?file1=${qlog_server_url}&file2=${qlog_client_url}`;
-            ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog #${i} in qvis*</a>`;
-          }
-        }
-      }
+      // if (test_result.result == "succeeded") {
+      //   if (type == "testcase") {
+      //     const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
+      //     const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/client.qlog`;
+      //     const qvis_url = `${QVIS_BASE_URL}#/files?list=${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
+      //     ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog in qvis*</a>`;
+      //   } else {
+      //     for (let i = 1, len = test_desc.repetitions || 1; i <= len; i++) {
+      //       const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/server.qlog`;
+      //       const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/client.qlog`;
+      //       const qvis_url = `${QVIS_BASE_URL}#?file1=${qlog_server_url}&file2=${qlog_client_url}`;
+      //       ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog #${i} in qvis*</a>`;
+      //     }
+      //   }
+      // }
       ttip += `</div></p>`;
-      if (test_result.result == "succeeded") {
-        ttip += '<small><i class="text-muted">*qlog files may not exist</i></small>';
-      }
+      // if (test_result.result == "succeeded") {
+      //   ttip += '<small><i class="text-muted">*qlog files may not exist</i></small>';
+      // }
     } else {
       var s = document.createElement("span");
       s.className = "d-inline-block";
@@ -232,7 +232,7 @@
     var cell = document.createElement("th");
     cell.scope = "row";
     cell.className = "table-light eff-title";
-    cell.innerHTML = "Avg. Efficiency";
+    cell.innerHTML = "Efficiency";
     effRow.appendChild(cell);
 
     for (var s = 0; s < result.servers.length; s++) {
@@ -257,7 +257,7 @@
     cell = document.createElement("th");
     cell.scope = "col";
     cell.className = "table-light eff-title";
-    cell.innerHTML = "Avg. Efficiency";
+    cell.innerHTML = "Efficiency";
     t.tHead.querySelector('tr').appendChild(cell);
 
     for (var c = 0; c < result.clients.length; c++) {
