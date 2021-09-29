@@ -3,9 +3,11 @@
 (function() {
   "use strict";
   // const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
-  const LOGS_BASE_URL = "";
+  // const LOGS_BASE_URL = "https://interop.sedrubal.de/";
+  const LOGS_BASE_URL = window.location.href;
   // const INDEX = "index.html";
   const INDEX = "";
+  const QVIS_BASE_URL = "https://qvis.quictools.info/";
   const map = { client: {}, server: {}, test: {} };
   const color_type = { succeeded: "success", unsupported: "secondary disabled", failed: "danger"};
 
@@ -23,17 +25,18 @@
       <b>Test:</b> ${test_desc.name}<br/>
       <b>Client:</b> ${client}<br/>
       <b>Server:</b> ${server}<br/>
-      <b>Result: <span class="text-${color_type[test_result.result]}">${test_result.result}</span></b>
+      <b>Result: <span class="badge badge-${color_type[test_result.result]}">${test_result.result}</span></b>
     `;
 
-    var btn = document.createElement("a");
+    var btn = document.createElement("button");
+    btn.type = "button";
     btn.className = `btn btn-xs btn-${color_type[test_result.result]} ${test_result.result} test-${test_result.abbr.toLowerCase()}`;
     if (type === "measurement" && test_result.result === "succeeded") {
       try {
         const rating = Number.parseInt(test_result.details.split(" ")[0]) / test_desc.theoretical_max_value;
         const adaptedRating = Math.min(1, rating * 2);
 
-        ttip += `<br/><b>Efficiency:</b> <span class="calc-rating rating-color" style="--rating: ${adaptedRating};">${(rating * 100).toFixed(0)} %</span>`;
+        ttip += `<br/><b>Efficiency:</b> <span class="badge badge-dark calc-rating rating-color" style="--rating: ${adaptedRating};">${(rating * 100).toFixed(0)} %</span>`;
 
         btn.style.setProperty("--rating", adaptedRating);
         btn.className += " calc-rating btn-rating"
@@ -46,6 +49,23 @@
       const log_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${INDEX}`;
       btn.href = log_url;
       btn.target = "_blank"
+      // popover
+      ttip += `<p><div class="btn-group-vertical">
+        <a class="btn btn-sm btn-secondary" href="${log_url}" target="_blank">Open Logs</a>`;
+      if (test_result.result == "succeeded") {
+        if (type == "testcase") {
+          const qvis_url = `${QVIS_BASE_URL}#/files?list=${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/server.qlog`;
+          ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog in qvis</a>`;
+        } else {
+          for (let i = 1, len = test_desc.repetitions || 1; i <= len; i++) {
+            const qlog_server_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/server.qlog`;
+            const qlog_client_url = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${test_desc.name}/${i}/client.qlog`;
+            const qvis_url = `${QVIS_BASE_URL}#?list=${qlog_server_url}&list=${qlog_client_url}`;
+            ttip += `<a class="btn btn-sm btn-outline-secondary" href="${qvis_url}" target="_blank">Open qlog #${i} in qvis</a>`;
+          }
+        }
+      }
+      ttip += `</div></p>`;
     } else {
       var s = document.createElement("span");
       s.className = "d-inline-block";
@@ -55,8 +75,16 @@
       ttip_target = s;
     }
     ttip_target.title = ttip;
-    $(ttip_target).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip({sanitize: false});
-    $(ttip_target).click(function() { $(this).blur(); });
+    $(ttip_target)
+      .attr("data-toggle", "popover")
+      .attr("data-placement", "bottom")
+      .attr("data-trigger", "click")
+      .attr("data-html", true)
+      .popover({sanitize: false})
+      .on('show.bs.popover', function(evt) {
+        // close all other popovers
+        $("[data-toggle=popover]").not(this).popover("hide");
+      });
     btn.appendChild(document.createTextNode(test_result.abbr));
     return ttip_target;
   }
@@ -420,6 +448,7 @@
         console.log("Received status: ", xhr.status);
         return;
       }
+      window.result = xhr.response;
       process(xhr.response, dir);
       document.getElementsByTagName("body")[0].classList.remove("loading");
     };
@@ -439,6 +468,7 @@
       return;
     }
     var s = document.createElement("select");
+    s.className = "custom-select custom-select-sm";
     xhr.response.reverse().forEach(function(el) {
       var opt = document.createElement("option");
       opt.innerHTML = el.replace("logs_", "");
