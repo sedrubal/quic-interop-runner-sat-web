@@ -114,10 +114,14 @@
       cell = document.createElement("th");
       row.appendChild(cell);
       cell.scope = "col";
-      cell.className = "table-light server-" + result.servers[i];
-      if (result.hasOwnProperty("urls"))
-        makeClickable(cell, result.urls[result.servers[i]]);
-      cell.innerHTML = result.servers[i];
+      const serverName = result.servers[i]
+      const compliant = result.images ? result.images[serverName].compliant : undefined;
+      cell.className = compliant === false ? "table-warning" : "table-light";
+      cell.classList.add(`server-${serverName}`);
+      if (result.hasOwnProperty("urls")) {
+        makeClickable(cell, result.urls[serverName]);
+      }
+      cell.innerHTML = serverName;
     }
   }
 
@@ -125,7 +129,10 @@
     var row = tbody.insertRow(i);
     var cell = document.createElement("th");
     cell.scope = "row";
-    cell.className = "table-light client-" + result.clients[i];
+    const clientName = result.clients[i]
+    const compliant = result.images ? result.images[clientName].compliant : undefined;
+    cell.className = compliant === false ? "table-warning" : "table-light";
+    cell.classList.add(`client-${clientName}`);
     if (result.hasOwnProperty("urls"))
       makeClickable(cell, result.urls[result.clients[i]]);
     cell.innerHTML = result.clients[i];
@@ -304,19 +311,26 @@
     return date.toLocaleDateString("en-US",  { timeZone: 'UTC' }) + " " + date.toLocaleTimeString("en-US", { timeZone: 'UTC', timeZoneName: 'short' });
   }
 
-  function makeButton(type, text, tooltip) {
-      var b = document.createElement("button");
-      b.innerHTML = text;
-      b.id = type + "-" + text.toLowerCase();
-      if (tooltip) {
-        b.title = tooltip;
-        $(b).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip();
-      }
-      b.type = "button";
-      b.className = type + " btn btn-light";
-      $(b).click(clickButton);
-      return b;
-  }
+  function makeButton(type, text, tooltip, compliant) {
+    var b = document.createElement("button");
+    b.innerHTML = text;
+    b.id = type + "-" + text.toLowerCase();
+    if (tooltip) {
+      b.title = tooltip;
+      $(b).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip();
+    }
+    b.type = "button";
+    b.className = `${type} btn`;
+    if (compliant === undefined || compliant) {
+      b.classList.add("btn-light");
+    } else {
+      b.classList.add("btn-warning");
+      b.title = "not compliant";
+      $(b).attr("data-toggle", "tooltip").attr("data-placement", "bottom").attr("data-html", true).tooltip();
+    }
+    $(b).click(clickButton);
+    return b;
+   }
 
   function toggleHighlight(e) {
     const comp = e.target.id.split("-");
@@ -415,8 +429,8 @@
     fillMeasurementTable(result, log_dir);
 
     $("#client").add("#server").add("#test").empty();
-    $("#client").append(result.clients.map(e => makeButton("client", e)));
-    $("#server").append(result.servers.map(e => makeButton("server", e)));
+    $("#client").append(result.clients.map(e => makeButton("client", e, undefined, result.images ? result.images[e].compliant : undefined)));
+    $("#server").append(result.servers.map(e => makeButton("server", e, undefined, result.images ? result.images[e].compliant : undefined)));
     if (result.hasOwnProperty("tests")) {
       $("#test").append(Object.keys(result.tests).map(e => makeButton("test", e, makeTooltip(result.tests[e].name, result.tests[e].desc))));
     } else {
