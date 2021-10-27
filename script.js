@@ -133,8 +133,9 @@
     const compliant = result.images ? result.images[clientName].compliant : undefined;
     cell.className = compliant === false ? "table-warning" : "table-light";
     cell.classList.add(`client-${clientName}`);
-    if (result.hasOwnProperty("urls"))
+    if (result.hasOwnProperty("urls")) {
       makeClickable(cell, result.urls[result.clients[i]]);
+    }
     cell.innerHTML = result.clients[i];
     row.appendChild(cell);
     return row;
@@ -321,7 +322,7 @@
     }
     b.type = "button";
     b.className = `${type} btn`;
-    if (compliant === undefined || compliant) {
+    if (compliant === undefined || compliant === null || compliant) {
       b.classList.add("btn-light");
     } else {
       b.classList.add("btn-warning");
@@ -330,7 +331,7 @@
     }
     $(b).click(clickButton);
     return b;
-   }
+  }
 
   function toggleHighlight(e) {
     const comp = e.target.id.split("-");
