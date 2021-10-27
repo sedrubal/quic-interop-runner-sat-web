@@ -71,13 +71,6 @@
       // if (test_result.result == "succeeded") {
       //   ttip += '<small><i class="text-muted">*qlog files may not exist</i></small>';
       // }
-    } else {
-      var s = document.createElement("span");
-      s.className = "d-inline-block";
-      s.tabIndex = 0;
-      btn.style = "pointer-events: none;";
-      s.appendChild(btn);
-      ttip_target = s;
     }
     $(ttip_target)
       .attr("data-toggle", "popover")
@@ -207,7 +200,7 @@
             measurement,
           );
           if (meas_result.result === "succeeded") {
-              link.innerHTML += ": " + meas_result.details;
+            link.innerHTML += ": " + meas_result.details;
           }
           btnGroup.appendChild(link);
         }
@@ -225,6 +218,8 @@
           if (measResult.result == "succeeded") {
             const eff = Number.parseInt(measResult.details.split(" ")[0]) / result.tests[measResult.abbr].theoretical_max_value;
             effsForCombi[measResult.abbr] = eff;
+          } else {
+            effsForCombi[measResult.abbr] = null;
           }
         });
         effsByCombi[s][c] = effsForCombi;
@@ -284,18 +279,19 @@
   }
 
   function createEffCell(effsByMeas, className) {
+    console.log(effsByMeas);
     var cell = document.createElement("th");
     cell.className = `table-light eff-cell ${className}`;
     const btnGroup = document.createElement('div');
     btnGroup.className = "btn-group-vertical";
     cell.appendChild(btnGroup);
     Object.entries(effsByMeas).forEach(([abbr, effs]) => {
-      const avgEff = effs.reduce((acc, cur) => acc + cur, 0) / effs.length;
+      const avgEff = effs.reduce((acc, cur) => acc + cur, 0) / effs.filter((e) => e !== null).length;
       const badge = document.createElement("span");
       var avgEffStr = "";
       if (isNaN(avgEff)) {
         avgEffStr = "-";
-        badge.className = `btn btn-xs badge-secondary test-${abbr.toLowerCase()}`;
+        badge.className = `btn btn-xs btn-danger test-${abbr.toLowerCase()}`;
       } else {
         avgEffStr = `${((avgEff) * 100).toFixed(0)} %`;
         badge.className = `btn btn-xs calc-rating btn-rating test-${abbr.toLowerCase()}`;
@@ -381,11 +377,12 @@
 
   function clickButton(e) {
     function toggle(array, value) {
-        var index = array.indexOf(value);
-        if (index === -1)
-            array.push(value);
-         else
-            array.splice(index, 1);
+      var index = array.indexOf(value);
+      if (index === -1) {
+        array.push(value);
+      } else {
+        array.splice(index, 1);
+      }
     }
 
     var b = $(e.target).closest(":button")[0];
@@ -442,18 +439,18 @@
     setButtonState();
 
     $("table.result").delegate("td", "mouseover mouseleave", function(e) {
-        const t = $(this).closest("table.result");
-        if (e.type === "mouseover") {
-          $(this).parent().addClass("hover-xy");
-          t.children("colgroup").eq($(this).index()).addClass("hover-xy");
-          t.find("th").eq($(this).index()).addClass("hover-xy");
-          t.find(".eff-row th").eq($(this).index()).addClass("hover-xy");
-        } else {
-          $(this).parent().removeClass("hover-xy");
-          t.children("colgroup").eq($(this).index()).removeClass("hover-xy");
-          t.find("th").eq($(this).index()).removeClass("hover-xy");
-          t.find(".eff-row th").eq($(this).index()).removeClass("hover-xy");
-        }
+      const t = $(this).closest("table.result");
+      if (e.type === "mouseover") {
+        $(this).parent().addClass("hover-xy");
+        t.children("colgroup").eq($(this).index()).addClass("hover-xy");
+        t.find("th").eq($(this).index()).addClass("hover-xy");
+        t.find(".eff-row th").eq($(this).index()).addClass("hover-xy");
+      } else {
+        $(this).parent().removeClass("hover-xy");
+        t.children("colgroup").eq($(this).index()).removeClass("hover-xy");
+        t.find("th").eq($(this).index()).removeClass("hover-xy");
+        t.find(".eff-row th").eq($(this).index()).removeClass("hover-xy");
+      }
     });
   }
 
