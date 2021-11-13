@@ -409,8 +409,8 @@
     return false;
   }
 
-  function makeTooltip(name, desc) {
-    return "<strong>" + name + "</strong>" + (desc === undefined ? "" : "<br>" + desc);
+  function makeTooltip(name, desc, timeout) {
+    return "<strong>" + name + "</strong>" + (desc === undefined ? "" : "<br>" + desc) + (timeout ? `<br><b>Test Timeout:</b> ${timeout} s` : "");
   }
 
   function process(result, log_dir) {
@@ -429,13 +429,7 @@
     $("#client").add("#server").add("#test").empty();
     $("#client").append(result.clients.map(e => makeButton("client", e, undefined, result.images ? result.images[e].compliant : undefined)));
     $("#server").append(result.servers.map(e => makeButton("server", e, undefined, result.images ? result.images[e].compliant : undefined)));
-    if (result.hasOwnProperty("tests")) {
-      $("#test").append(Object.keys(result.tests).map(e => makeButton("test", e, makeTooltip(result.tests[e].name, result.tests[e].desc))));
-    } else {
-      // TODO: this else can eventually be removed, when all past runs have the test descriptions in the json
-      const tcases = result.results.concat(result.measurements).flat().map(x => [x.abbr, x.name]).filter((e, i, a) => a.map(x => x[0]).indexOf(e[0]) === i);
-      $("#test").append(tcases.map(e => makeButton("test", e[0], makeTooltip(e[1]))));
-    }
+    $("#test").append(Object.keys(result.tests).map(e => makeButton("test", e, makeTooltip(result.tests[e].name, result.tests[e].desc, result.tests[e].timeout))));
     setButtonState();
 
     $("table.result").delegate("td", "mouseover mouseleave", function(e) {
