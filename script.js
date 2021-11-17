@@ -185,11 +185,10 @@
         const btnGroup = document.createElement('div');
         btnGroup.className = "btn-group-vertical";
         cell.appendChild(btnGroup);
-        for(var k = 0; k < res.length; k++) {
-          const meas_result = res[k];
+        res.sort((a, b) => a['abbr'] < b['abbr'] ? -1 : a['abbr'] > b['abbr'] ? 1 : 0).forEach((meas_result) => {
           const measurement = result.tests[meas_result.abbr];
           if (!meas_result.result) {
-            continue;
+            return;
           }
           var link = getLogLink(
             "measurement",
@@ -203,7 +202,7 @@
             link.innerHTML += ": " + meas_result.details;
           }
           btnGroup.appendChild(link);
-        }
+        });
         index++;
       }
     }
@@ -291,7 +290,7 @@
       var avgEffStr = "";
       if (isNaN(avgEff)) {
         avgEffStr = "-";
-        badge.className = `btn btn-xs btn-danger test-${abbr.toLowerCase()}`;
+        badge.className = `btn btn-xs btn-secondary disabled test-${abbr.toLowerCase()}`;
       } else {
         avgEffStr = `${((avgEff) * 100).toFixed(0)} %`;
         badge.className = `btn btn-xs calc-rating btn-rating test-${abbr.toLowerCase()}`;
