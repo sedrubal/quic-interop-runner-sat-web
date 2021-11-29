@@ -332,7 +332,7 @@
         const imgSrc = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${measurement}/time_offset-number_plot.png`;
         plotWrapper.innerHTML = `
           <a href="${imgSrc}" target="_blank">
-            <img class="plot" src="${imgSrc}" alt="🗙📈" title="Plot not available for server=${server} client=${client} measurement=${measurement}" />
+            <img class="plot" src="${imgSrc}" alt="🗙📈" title="server=${server} client=${client} measurement=${measurement}" />
           </a>
         `;
         cell.appendChild(plotWrapper);
@@ -551,7 +551,7 @@
     // update plot measurement select
     window.showPlotsForMeasurement = Object.values(result.tests).pop().name;
     const select = document.getElementById("plot-measurement-select");
-    select.innerHtml = "";
+    select.textContent = "";
     Object.values(result.tests).forEach((meas) => {
       const option = document.createElement("option");
       option.value = meas.name;
