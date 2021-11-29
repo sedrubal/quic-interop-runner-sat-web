@@ -278,7 +278,6 @@
   }
 
   function createEffCell(effsByMeas, className) {
-    console.log(effsByMeas);
     var cell = document.createElement("th");
     cell.className = `table-light eff-cell ${className}`;
     const btnGroup = document.createElement('div');
