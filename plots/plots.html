@@ -72,9 +72,12 @@
         links.forEach((link) => {
           const child = document.createElement("div");
           child.innerHTML = `
-        <a href="${link}" target="_blank">
-          <img class="plot" src="" data-src="${link}" alt="${link}">
-        </a>
+         <figure>
+            <a href="${link}" target="_blank">
+              <img class="plot" src="" data-src="${link}" alt="Loading...">
+            </a>
+           <figcaption>${link.split('/').pop()}</figcaption>
+         </figure>
         `;
           plotContainer.appendChild(child);
           plots.push(child.querySelector("img"));
