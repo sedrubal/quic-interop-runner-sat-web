@@ -327,11 +327,13 @@
       for (var s = 0; s < result.servers.length; s++) {
         var cell = row.insertCell(s + 1);
         cell.className = `server-${result.servers[s]} client-${result.clients[c]}`;
-	const testResult = result.measurements[c * result.servers.length + s].filter((r) => r.abbr === measAbbr)[0];
+        const testResult = result.measurements[
+          c * result.servers.length + s
+        ].filter((r) => r.abbr === measAbbr)[0];
         const wrapper = document.createElement("div");
-	if (!testResult) {
-	  wrapper.innerHTML = `<span class="badge badge-warning">No Result Found</span>`;
-	} else if (testResult.result === "succeeded") {
+        if (!testResult) {
+          wrapper.innerHTML = `<span class="badge badge-warning">No Result Found</span>`;
+        } else if (testResult.result === "succeeded") {
           const server = result.servers[s];
           const client = result.clients[c];
           const imgSrc = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${measurement}/time_offset-number_plot.png`;
@@ -340,9 +342,9 @@
               <img class="plot" src="${imgSrc}" alt="🗙📈" title="server=${server} client=${client} measurement=${measurement}" />
             </a>
           `;
-	} else {
+        } else {
           wrapper.innerHTML = `<span class="badge badge-danger">Test Failed</span>`;
-	}
+        }
         cell.appendChild(wrapper);
         index++;
       }

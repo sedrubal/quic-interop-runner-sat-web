@@ -1,103 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Plots</title>
-  <style>
-@keyframes pulse {
-  from {
-    background-color: #729fcf;
-  }
-  to {
-    background-color: #26518c;
-  }
-}
-html {
-  text-align: center;
-  background-color: #eee;
-}
-#plots {
-  padding: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 10vh;
-}
-.plot {
-  width: 25rem;
-  min-height: 20rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #729fcf;
-  color: #fff;
-  animation-name: pulse;
-  animation-duration: 1s;
-  animation-direction: alternate;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-}
-  </style>
-</head>
-<body>
-  <h1>Plots</h1>
-  <div id="plots">
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-    <div class="plot">Loading...</div>
-  </div>
-  <script>
-    "use strict";
-    async function render() {
-      const DIRLISTING = "https://interop.sedrubal.de/plots/";
-      const response = await fetch(DIRLISTING)
-      const dirlisting = await response.text();
-      const parser = new DOMParser();
-      const dirlisting_dom = parser.parseFromString(dirlisting, "text/html");
-      const links = Array.from(dirlisting_dom.querySelectorAll('a[href$=".png"]')).map((a => a.href));
-      const plotContainer = document.querySelector("#plots");
-      plotContainer.innerHTML = "";
-      const plots = [];
-      links.forEach((link) => {
-        const child = document.createElement("div");
-        child.innerHTML = `
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plots</title>
+    <style>
+      @keyframes pulse {
+        from {
+          background-color: #729fcf;
+        }
+        to {
+          background-color: #26518c;
+        }
+      }
+      html {
+        text-align: center;
+        background-color: #eee;
+      }
+      #plots {
+        padding: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 10vh;
+      }
+      .plot {
+        width: 25rem;
+        min-height: 20rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #729fcf;
+        color: #fff;
+        animation-name: pulse;
+        animation-duration: 1s;
+        animation-direction: alternate;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Plots</h1>
+    <div id="plots">
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+      <div class="plot">Loading...</div>
+    </div>
+    <script>
+      "use strict";
+      async function render() {
+        const DIRLISTING = "https://interop.sedrubal.de/plots/";
+        const response = await fetch(DIRLISTING);
+        const dirlisting = await response.text();
+        const parser = new DOMParser();
+        const dirlisting_dom = parser.parseFromString(dirlisting, "text/html");
+        const links = Array.from(
+          dirlisting_dom.querySelectorAll('a[href$=".png"]')
+        ).map((a) => a.href);
+        const plotContainer = document.querySelector("#plots");
+        plotContainer.innerHTML = "";
+        const plots = [];
+        links.forEach((link) => {
+          const child = document.createElement("div");
+          child.innerHTML = `
         <a href="${link}" target="_blank">
           <img class="plot" src="" data-src="${link}" alt="${link}">
         </a>
         `;
-        plotContainer.appendChild(child);
-        plots.push(child.querySelector('img'));
-      });
+          plotContainer.appendChild(child);
+          plots.push(child.querySelector("img"));
+        });
 
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              observer.unobserve(entry.target);
-            }
-            entry.target.src = entry.target.dataset.src;
-          })
-        },
-        {
-          root: plotContainer,
-          rootMargin: '0px 0px 100px 0px',
-        },
-      );
-      plots.forEach((plot) => {
-        observer.observe(plot);
-      });
-    }
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                observer.unobserve(entry.target);
+              }
+              entry.target.src = entry.target.dataset.src;
+            });
+          },
+          {
+            root: plotContainer,
+            rootMargin: "0px 0px 100px 0px",
+          }
+        );
+        plots.forEach((plot) => {
+          observer.observe(plot);
+        });
+      }
 
-    render();
-  </script>
-</body>
+      render();
+    </script>
+  </body>
 </html>
