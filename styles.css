@@ -69,6 +69,7 @@ th.hover-xy {
 }
 .plot {
   max-width: 25rem;
+  display: block;
 }
 #plots.table td,
 #plots.table th {

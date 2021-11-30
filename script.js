@@ -313,29 +313,37 @@
   function fillPlotsTable() {
     const result = window.result;
     const log_dir = window.log_dir;
-    const measurement = window.showPlotsForMeasurement;
+    const measAbbr = window.showPlotsForMeasurement;
+    const measurement = result.tests[measAbbr].name;
     // fill table
     var t = document.getElementById("plots");
     t.innerHTML = "";
     makeColumnHeaders(t, result);
     var tbody = t.createTBody();
     var index = 0;
-    for (var i = 0; i < result.clients.length; i++) {
-      var row = makeRowHeader(tbody, result, i);
-      row.className = `row-${result.clients[i]}`;
-      for (var j = 0; j < result.servers.length; j++) {
-        var cell = row.insertCell(j + 1);
-        cell.className = `server-${result.servers[j]} client-${result.clients[i]}`;
-        const plotWrapper = document.createElement("div");
-        const server = result.servers[j];
-        const client = result.clients[i];
-        const imgSrc = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${measurement}/time_offset-number_plot.png`;
-        plotWrapper.innerHTML = `
-          <a href="${imgSrc}" target="_blank">
-            <img class="plot" src="${imgSrc}" alt="🗙📈" title="server=${server} client=${client} measurement=${measurement}" />
-          </a>
-        `;
-        cell.appendChild(plotWrapper);
+    for (var c = 0; c < result.clients.length; c++) {
+      var row = makeRowHeader(tbody, result, c);
+      row.className = `row-${result.clients[c]}`;
+      for (var s = 0; s < result.servers.length; s++) {
+        var cell = row.insertCell(s + 1);
+        cell.className = `server-${result.servers[s]} client-${result.clients[c]}`;
+	const testResult = result.measurements[c * result.servers.length + s].filter((r) => r.abbr === measAbbr)[0];
+        const wrapper = document.createElement("div");
+	if (!testResult) {
+	  wrapper.innerHTML = `<span class="badge badge-warning">No Result Found</span>`;
+	} else if (testResult.result === "succeeded") {
+          const server = result.servers[s];
+          const client = result.clients[c];
+          const imgSrc = `${LOGS_BASE_URL}logs/${log_dir}/${server}_${client}/${measurement}/time_offset-number_plot.png`;
+          wrapper.innerHTML = `
+            <a href="${imgSrc}" target="_blank">
+              <img class="plot" src="${imgSrc}" alt="🗙📈" title="server=${server} client=${client} measurement=${measurement}" />
+            </a>
+          `;
+	} else {
+          wrapper.innerHTML = `<span class="badge badge-danger">Test Failed</span>`;
+	}
+        cell.appendChild(wrapper);
         index++;
       }
     }
@@ -549,20 +557,21 @@
       '")';
 
     // update plot measurement select
-    window.showPlotsForMeasurement = Object.values(result.tests).pop().name;
+    window.showPlotsForMeasurement = Object.keys(result.tests).pop();
     const select = document.getElementById("plot-measurement-select");
     select.textContent = "";
-    Object.values(result.tests).forEach((meas) => {
+    Object.entries(result.tests).forEach(([measAbbr, meas]) => {
       const option = document.createElement("option");
-      option.value = meas.name;
-      option.innerText = meas.name;
-      if (window.showPlotsForMeasurement == meas.name) {
+      option.value = measAbbr;
+      option.innerText = `${meas.name} (${measAbbr})`;
+      if (window.showPlotsForMeasurement == measAbbr) {
         option.selected = "selected";
       }
       select.appendChild(option);
     });
     select.addEventListener("change", (evt) => {
       window.showPlotsForMeasurement = evt.currentTarget.value;
+      console.log(`Showing ${window.showPlotsForMeasurement} plots`);
       fillPlotsTable();
     });
 
