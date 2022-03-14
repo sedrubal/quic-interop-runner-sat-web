@@ -1,6 +1,6 @@
 /* globals document, window, console, URLSearchParams, XMLHttpRequest, $, history */
 
-(function () {
+(async function () {
   "use strict";
   // const LOGS_BASE_URL = "https://f000.backblazeb2.com/file/quic-interop-runner-sat/";
   // const LOGS_BASE_URL = "https://interop.sedrubal.de/";
@@ -509,7 +509,7 @@
       history.state ? history.state.path : window.location.search
     );
     if (params.has(type)) {
-      map[type] = params.get(type).split(",");
+      map[type] = params.get(type).split(",").filter((el) => el);
     } else {
       map[type] = $(`#${type} :button`)
         .get()
@@ -686,52 +686,62 @@
     });
   }
 
-  function load(dir) {
+  async function load(run) {
     document.getElementsByTagName("body")[0].classList.add("loading");
-    var xhr = new XMLHttpRequest();
-    xhr.responseType = "json";
-    xhr.open("GET", `${LOGS_BASE_URL}logs/${dir}/result.json`);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState !== XMLHttpRequest.DONE) {
-        return;
+    // set run in URL search
+    const params = new URLSearchParams(window.location.search);
+    params.set("run", run);
+    const comp = decodeURIComponent(params.toString());
+    const refresh = `${window.location.protocol}//${window.location.host}${window.location.pathname}${comp ? `?${comp}` : ""}`;
+    window.history.pushState(null, null, refresh);
+
+    // load
+    try {
+      const response = await fetch(`${LOGS_BASE_URL}logs/${run}/result.json`);
+      if (response.status !== 200) {
+        throw Error(`Received status ${response.status}`);
       }
-      if (xhr.status !== 200) {
-        console.log("Received status: ", xhr.status);
-        return;
-      }
-      process(xhr.response, dir);
-      document.getElementsByTagName("body")[0].classList.remove("loading");
-    };
-    xhr.send();
+      const data = await response.json();
+
+      process(data, run);
+    } catch (err) {
+      console.warn(err);
+    }
+
+    document.getElementsByTagName("body")[0].classList.remove("loading");
   }
 
-  load("latest");
+  const run = (new URLSearchParams(window.location.search)).get("run");
 
   // enable loading of old runs
-  var xhr = new XMLHttpRequest();
-  xhr.responseType = "json";
-  xhr.open("GET", `${LOGS_BASE_URL}logs/logs.json`);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState !== XMLHttpRequest.DONE) {
-      return;
+  try {
+    const response = await fetch(`${LOGS_BASE_URL}logs/logs.json`);
+    if (response.status !== 200) {
+      throw Error(`Received status ${response.status}`);
     }
-    if (xhr.status !== 200) {
-      console.log("Received status: ", xhr.status);
-      return;
-    }
-    var s = document.createElement("select");
-    s.className = "custom-select custom-select-sm";
-    xhr.response.reverse().forEach(function (el) {
-      var opt = document.createElement("option");
+    const data = await response.json();
+
+    const select = document.createElement("select");
+    select.className = "custom-select custom-select-sm";
+    data.reverse().forEach((el) => {
+      const opt = document.createElement("option");
       opt.innerHTML = el.replace("logs_", "");
       opt.value = el;
-      s.appendChild(opt);
+      select.appendChild(opt);
     });
-    s.addEventListener("change", function (ev) {
-      load(ev.currentTarget.value);
-    });
-    document.getElementById("available-runs").appendChild(s);
-    load(s.value);
-  };
-  xhr.send();
+    select.addEventListener("change", (ev) => load(ev.currentTarget.value));
+    document.getElementById("available-runs").appendChild(select);
+    // select index by URL param
+    if (run) {
+      const curIndex = Array.from(select.options).reduce((acc, cur, idx) => cur.value === run ? idx : acc, -1);
+      if (curIndex !== -1) {
+        select.selectedIndex = curIndex;
+      }
+    }
+    // load
+    await load(select.value || "latest");
+  } catch (err) {
+    console.warn(err);
+    await load("latest");
+  }
 })();
