@@ -19,6 +19,28 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <link rel="shortcut icon" type="image/svg+xml" href="satellite-gs.svg" />
+    <meta name="citation_title" content="Performance of QUIC Implementations Over Geostationary Satellite Links">
+    <meta name="citation_author" content="Endres, Sebastian">
+    <meta name="citation_author" content="Deutschmann, Jörg">
+    <meta name="citation_author" content="Hielscher, Kai-Steffen">
+    <meta name="citation_author" content="German, Reinhard">
+    <meta name="citation_date" content="2022-02-16">
+    <meta name="citation_online_date" content="2022-02-16">
+    <meta name="citation_arxiv_id" content="2202.08228">
+    <meta name="citation_url" content="http://arxiv.org/abs/2202.08228">
+    <meta name="citation_abstract" content="QUIC was recently standardized as RFC 9000, but the performance of QUIC over
+		geostationary satellite links is problematic due to the non-applicability of
+		Performance Enhancing Proxies. As of today, there are more than a dozen of
+		different QUIC implementations. So far performance evaluations of QUIC over
+		satellite links were limited to specific QUIC implementations. By deploying a
+		modified version of the IETF QUIC-Interop-Runner, this paper evaluates the
+		performance of multiple QUIC implementations over multiple geostationary
+		satellite links. This includes two emulated ones (with and without packet loss)
+		and two real ones. The results show that the goodput achieved with QUIC over
+		geostationary satellite links is very poor in general, and especially poor when
+		there is packet loss. Some implementations fail completely and the performance
+		of the other implementations varies greatly. The performance depends on both
+		client and server implementation.">
   </head>
   <body>
     <a
@@ -126,6 +148,15 @@
           The results were obtained with QUIC version
           <span id="quic-vers"></span>.
         </p>
+
+	<hr/>
+
+        <small class="text-muted">
+          <p>
+            This work has been funded by the <a href="https://bmwi.de/" target="_blank" rel="nofollow noreferrer">BMWi</a> in the <a href="https://www.cs7.tf.fau.eu/2021/11/01/new-researchproject-quicsat/" target="_blank">QUICSAT project</a>.
+            A pre-print paper is available on <a href="https://arxiv.org/abs/2202.08228" target="_blank" rel="nofollow noreferrer">arxiv.org</a> and a more verbose master's thesis is available <a href="thesis.pdf">here</a>.
+          </p>
+        </small>
       </section>
 
       <h3 class="mt-5">Results Filter</h3>
