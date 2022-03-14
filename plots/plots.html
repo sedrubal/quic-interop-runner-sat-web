@@ -37,10 +37,31 @@
         animation-iteration-count: infinite;
         animation-timing-function: ease-in-out;
       }
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <h1>Plots</h1>
+    <p>
+      Server:
+      <select name="server">
+        <option value="all">all</option>
+      </select>
+      Client:
+      <select name="client">
+        <option value="all">all</option>
+      </select>
+      Measurement:
+      <select name="meas">
+        <option value="all">all</option>
+      </select>
+      Type:
+      <select name="type">
+        <option value="all">all</option>
+      </select>
+    </p>
     <div id="plots">
       <div class="plot">Loading...</div>
       <div class="plot">Loading...</div>
@@ -57,8 +78,8 @@
     </div>
     <script>
       "use strict";
-      async function render() {
-        const DIRLISTING = "https://interop.sedrubal.de/plots/";
+      async function loadAndRender() {
+        const DIRLISTING = "/plots/";
         const response = await fetch(DIRLISTING);
         const dirlisting = await response.text();
         const parser = new DOMParser();
@@ -69,27 +90,45 @@
         const plotContainer = document.querySelector("#plots");
         plotContainer.innerHTML = "";
         const plots = [];
+        const linkRe =
+          /.*\/(([\w-]+)_([\w-]+)_(\w+)_time_([\w-_]+)_plot\.png)$/;
+        const values = {
+          server: new Set(),
+          client: new Set(),
+          meas: new Set(),
+          type: new Set(),
+        };
+        const figureTemplate = document.createElement("template");
         links.forEach((link) => {
           const child = document.createElement("div");
+          const [_, fileName, server, client, meas, type] = linkRe.exec(link);
+          values["server"].add(server);
+          values["client"].add(client);
+          values["meas"].add(meas);
+          values["type"].add(type);
           child.innerHTML = `
-         <figure>
+         <figure data-server="${server}" data-client="${client}" data-meas="${meas}" data-type="${type}">
             <a href="${link}" target="_blank">
               <img class="plot" src="" data-src="${link}" alt="Loading...">
             </a>
-           <figcaption>${link.split('/').pop()}</figcaption>
+           <figcaption>${fileName}</figcaption>
          </figure>
         `;
-          plotContainer.appendChild(child);
-          plots.push(child.querySelector("img"));
+          const figure = child.children[0];
+          plotContainer.appendChild(figure);
+          plots.push(figure.querySelector("img"));
         });
+        if (plots.length === 0) {
+          plotContainer.innerText = "No plots available.";
+        }
 
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
                 observer.unobserve(entry.target);
+                entry.target.src = entry.target.dataset.src;
               }
-              entry.target.src = entry.target.dataset.src;
             });
           },
           {
@@ -100,9 +139,41 @@
         plots.forEach((plot) => {
           observer.observe(plot);
         });
+
+        document.querySelectorAll("select").forEach((select) => {
+          select.addEventListener("change", updateHidden);
+          values[select.name].forEach((value) => {
+            const option = document.createElement("option");
+            option.name = value;
+            option.innerText = value;
+            select.appendChild(option);
+          });
+        });
+
+        updateHidden();
       }
 
-      render();
+      function updateHidden() {
+        const server = document.querySelector("select[name=server]").value;
+        const client = document.querySelector("select[name=client]").value;
+        const meas = document.querySelector("select[name=meas]").value;
+        const type = document.querySelector("select[name=type]").value;
+
+        document.querySelectorAll("figure").forEach((figure) => {
+          const show =
+            (server === "all" || server === figure.dataset.server) &&
+            (client === "all" || client === figure.dataset.client) &&
+            (meas === "all" || meas === figure.dataset.meas) &&
+            (type === "all" || type === figure.dataset.type);
+          if (show) {
+            figure.classList.remove("hidden");
+          } else {
+            figure.classList.add("hidden");
+          }
+        });
+      }
+
+      loadAndRender();
     </script>
   </body>
 </html>
