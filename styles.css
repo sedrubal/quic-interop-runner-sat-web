@@ -63,6 +63,21 @@ th.hover-xy {
   filter: brightness(1.2) saturate(5);
 }
 
+@media print {
+  .calc-rating.btn-rating {
+    background: none;
+    border-color: var(--rating-color);
+    color: #000;
+  }
+
+  .btn-danger,
+  .btn-secondary,
+  .btn-secondary.disabled {
+    color: #000;
+    background: none;
+  }
+}
+
 #plot-measurement-select {
   width: auto;
   display: inline;
