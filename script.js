@@ -165,7 +165,9 @@
     var index = 0;
     var appendResult = function (el, res, i, j) {
       result.results[index].forEach(function (test_result) {
-        if (test_result.result !== res) return;
+        if (test_result.result !== res) {
+          return;
+        }
         el.appendChild(
           getLogLink(
             "testcase",
@@ -516,8 +518,9 @@
 
     toggle(map[type], which);
     params.set(type, map[type]);
-    if (map[type].length === $(`#${type} :button`).length)
+    if (map[type].length === $(`#${type} :button`).length) {
       params.delete(type);
+    }
 
     const comp = decodeURIComponent(params.toString());
     var refresh =
@@ -636,8 +639,8 @@
         )
       )
     );
-    $("#no-client").click((evt) => unselectAll(evt, 'client'));
-    $("#all-client").click((evt) => selectAll(evt, 'client'));
+    $("#no-client").click((evt) => unselectAll(evt, "client"));
+    $("#all-client").click((evt) => selectAll(evt, "client"));
     $("#server").append(
       result.servers.map((e) =>
         makeButton(
@@ -648,8 +651,8 @@
         )
       )
     );
-    $("#no-server").click((evt) => unselectAll(evt, 'server'));
-    $("#all-server").click((evt) => selectAll(evt, 'server'));
+    $("#no-server").click((evt) => unselectAll(evt, "server"));
+    $("#all-server").click((evt) => selectAll(evt, "server"));
     $("#test").append(
       Object.keys(result.tests).map((e) =>
         makeButton(
@@ -663,8 +666,8 @@
         )
       )
     );
-    $("#no-test").click((evt) => unselectAll(evt, 'test'));
-    $("#all-test").click((evt) => selectAll(evt, 'test'));
+    $("#no-test").click((evt) => unselectAll(evt, "test"));
+    $("#all-test").click((evt) => selectAll(evt, "test"));
     setButtonState();
 
     $("table.result").delegate("td", "mouseover mouseleave", function (e) {
@@ -689,7 +692,9 @@
     xhr.responseType = "json";
     xhr.open("GET", `${LOGS_BASE_URL}logs/${dir}/result.json`);
     xhr.onreadystatechange = function () {
-      if (xhr.readyState !== XMLHttpRequest.DONE) return;
+      if (xhr.readyState !== XMLHttpRequest.DONE) {
+        return;
+      }
       if (xhr.status !== 200) {
         console.log("Received status: ", xhr.status);
         return;
@@ -707,7 +712,9 @@
   xhr.responseType = "json";
   xhr.open("GET", `${LOGS_BASE_URL}logs/logs.json`);
   xhr.onreadystatechange = function () {
-    if (xhr.readyState !== XMLHttpRequest.DONE) return;
+    if (xhr.readyState !== XMLHttpRequest.DONE) {
+      return;
+    }
     if (xhr.status !== 200) {
       console.log("Received status: ", xhr.status);
       return;
