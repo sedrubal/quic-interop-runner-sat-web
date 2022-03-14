@@ -435,10 +435,10 @@
         .map((x) => x.toLowerCase().split(","))
         .flat();
       if (map[type].length === 0)
-        map[type] = $("#" + type + " :button")
+        map[type] = $(`#${type} :button`)
           .get()
           .map((x) => x.id.replace(type + "-", ""));
-      $("#" + type + " :button")
+      $(`#${type} :button`)
         .removeClass("active font-weight-bold")
         .addClass("text-muted font-weight-light")
         .filter((i, e) => map[type].includes(e.id.replace(type + "-", "")))
@@ -506,16 +506,17 @@
     var params = new URLSearchParams(
       history.state ? history.state.path : window.location.search
     );
-    if (params.has(type) && params.get(type))
+    if (params.has(type)) {
       map[type] = params.get(type).split(",");
-    else
-      map[type] = $("#" + type + " :button")
+    } else {
+      map[type] = $(`#${type} :button`)
         .get()
         .map((e) => e.id.replace(type + "-", ""));
+    }
 
     toggle(map[type], which);
     params.set(type, map[type]);
-    if (map[type].length === $("#" + type + " :button").length)
+    if (map[type].length === $(`#${type} :button`).length)
       params.delete(type);
 
     const comp = decodeURIComponent(params.toString());
@@ -581,6 +582,49 @@
     fillMeasurementTable(result, log_dir);
     fillPlotsTable();
 
+    function unselectAll(evt, type) {
+      $(evt.target).blur();
+
+      var params = new URLSearchParams(
+        history.state ? history.state.path : window.location.search
+      );
+      params.set(type, "");
+      const comp = decodeURIComponent(params.toString());
+      var refresh =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname +
+        (comp ? "?" + comp : "");
+      window.history.pushState(null, null, refresh);
+
+      setButtonState();
+      return false;
+    }
+
+    function selectAll(evt, type) {
+      $(evt.target).blur();
+
+      var params = new URLSearchParams(
+        history.state ? history.state.path : window.location.search
+      );
+      const allOfType = $(`#${type} :button`)
+        .get()
+        .map((e) => e.id.replace(type + "-", ""));
+      params.set(type, allOfType.join(","));
+      const comp = decodeURIComponent(params.toString());
+      var refresh =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname +
+        (comp ? "?" + comp : "");
+      window.history.pushState(null, null, refresh);
+
+      setButtonState();
+      return false;
+    }
+
     $("#client").add("#server").add("#test").empty();
     $("#client").append(
       result.clients.map((e) =>
@@ -592,6 +636,8 @@
         )
       )
     );
+    $("#no-client").click((evt) => unselectAll(evt, 'client'));
+    $("#all-client").click((evt) => selectAll(evt, 'client'));
     $("#server").append(
       result.servers.map((e) =>
         makeButton(
@@ -602,6 +648,8 @@
         )
       )
     );
+    $("#no-server").click((evt) => unselectAll(evt, 'server'));
+    $("#all-server").click((evt) => selectAll(evt, 'server'));
     $("#test").append(
       Object.keys(result.tests).map((e) =>
         makeButton(
@@ -615,6 +663,8 @@
         )
       )
     );
+    $("#no-test").click((evt) => unselectAll(evt, 'test'));
+    $("#all-test").click((evt) => selectAll(evt, 'test'));
     setButtonState();
 
     $("table.result").delegate("td", "mouseover mouseleave", function (e) {
