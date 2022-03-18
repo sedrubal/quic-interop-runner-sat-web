@@ -344,6 +344,8 @@
               <img class="plot" src="${imgSrc}" alt="🚫" title="server=${server} client=${client} measurement=${measurement}" />
             </a>
           `;
+        } else if (testResult.result === "unsupported") {
+          wrapper.innerHTML = `<span class="badge badge-${color_type[testResult.result]}">Test Unsupported</span>`;
         } else {
           wrapper.innerHTML = `<span class="badge badge-danger">Test Failed</span>`;
         }
@@ -452,6 +454,7 @@
     $(".result td")
       .add(".result th")
       .add(".result td .btn")
+      .add(".result th .btn")
       .add(".result th .badge")
       .not(".eff-title")
       .hide();
@@ -472,16 +475,16 @@
       $(e).find("span,br").remove();
       var count = { succeeded: 0, unsupported: 0, failed: 0 };
       Object.keys(count).map(
-        (c) => (count[c] = $(".btn." + e.id + "." + c + ":visible").length)
+        (c) => (count[c] = $(`.btn.${e.id}.${c}:visible`).length)
       );
       Object.keys(count).map((c) => {
         e.appendChild(document.createElement("br"));
         var b = document.createElement("span");
         b.innerHTML = count[c];
-        b.className = "btn btn-xs btn-" + color_type[c];
+        b.className = `btn btn-xs btn-${color_type[c]}`;
         if (e.classList.contains("active") === false)
-          b.className += " disabled";
-        b.id = e.id + "-" + c;
+          b.classList.add("disabled");
+        b.id = `${e.id}-${c}`;
         $(b).hover(toggleHighlight, toggleHighlight);
         e.appendChild(b);
       });
