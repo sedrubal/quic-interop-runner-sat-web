@@ -345,7 +345,9 @@
             </a>
           `;
         } else if (testResult.result === "unsupported") {
-          wrapper.innerHTML = `<span class="badge badge-${color_type[testResult.result]}">Test Unsupported</span>`;
+          wrapper.innerHTML = `<span class="badge badge-${
+            color_type[testResult.result]
+          }">Test Unsupported</span>`;
         } else {
           wrapper.innerHTML = `<span class="badge badge-danger">Test Failed</span>`;
         }
@@ -512,7 +514,10 @@
       history.state ? history.state.path : window.location.search
     );
     if (params.has(type)) {
-      map[type] = params.get(type).split(",").filter((el) => el);
+      map[type] = params
+        .get(type)
+        .split(",")
+        .filter((el) => el);
     } else {
       map[type] = $(`#${type} :button`)
         .get()
@@ -695,7 +700,9 @@
     const params = new URLSearchParams(window.location.search);
     params.set("run", run);
     const comp = decodeURIComponent(params.toString());
-    const refresh = `${window.location.protocol}//${window.location.host}${window.location.pathname}${comp ? `?${comp}` : ""}`;
+    const refresh = `${window.location.protocol}//${window.location.host}${
+      window.location.pathname
+    }${comp ? `?${comp}` : ""}`;
     window.history.pushState(null, null, refresh);
 
     // load
@@ -714,7 +721,7 @@
     document.getElementsByTagName("body")[0].classList.remove("loading");
   }
 
-  const run = (new URLSearchParams(window.location.search)).get("run");
+  const run = new URLSearchParams(window.location.search).get("run");
 
   // enable loading of old runs
   try {
@@ -736,7 +743,10 @@
     document.getElementById("available-runs").appendChild(select);
     // select index by URL param
     if (run) {
-      const curIndex = Array.from(select.options).reduce((acc, cur, idx) => cur.value === run ? idx : acc, -1);
+      const curIndex = Array.from(select.options).reduce(
+        (acc, cur, idx) => (cur.value === run ? idx : acc),
+        -1
+      );
       if (curIndex !== -1) {
         select.selectedIndex = curIndex;
       }
