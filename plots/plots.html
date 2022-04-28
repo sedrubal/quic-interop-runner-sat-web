@@ -79,7 +79,7 @@
     <script>
       "use strict";
       async function loadAndRender() {
-        const DIRLISTING = "/plots/";
+        const DIRLISTING = window.location.href.replace(/plots\.html$/, "");
         const response = await fetch(DIRLISTING);
         const dirlisting = await response.text();
         const parser = new DOMParser();
