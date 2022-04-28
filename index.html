@@ -135,16 +135,45 @@
           ns-3 scenario. Parameters are:
         </p>
 
-        <ul>
-          <li>File size: 10 MB</li>
-          <li>RTT: 600 ms</li>
-          <li>Data Rate: 20 Mbps forward link, 2 Mbps return link</li>
-          <li>Loss Rate (in SATLOSS test case): 1 %</li>
-        </ul>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <td></td>
+              <th>T / terrestrial</th>
+              <th>SAT / sat</th>
+              <th>SATL / satloss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>File Size</th>
+              <td>10 MiB</td>
+              <td>10 MiB</td>
+              <td>10 MiB</td>
+            </tr>
+            <tr>
+              <th>RTT</th>
+              <td>20 Mbps (symmetric)</td>
+              <td>20 Mbps (forward link) / 2 Mbps (return link)</td>
+              <td>20 Mbps (forward link) / 2 Mbps (return link)</td>
+            </tr>
+            <tr>
+              <th>Loss Rate</th>
+              <td>0 %</td>
+              <td>0 %</td>
+              <td>1 % (uniform random)</td>
+            </tr>
+          </tbody>
+        </table>
 
         <p>
           The efficiency is calculated as <code>goodput / link data rate</code>.
         </p>
+
+	<p>
+	  This are the <strong>results as published in our paper</strong>.
+	  <a href="/" class="btn btn-sm btn-secondary">Here</a> are the results of our regular long-term measurements.
+	</p>
 
         <p>
           In the following tables, results for
@@ -154,32 +183,35 @@
           The results were obtained with QUIC version
           <span id="quic-vers"></span>.
         </p>
-
-        <hr />
-
-        <small class="text-muted">
-          <p>
-            This work has been funded by the
-            <a href="https://bmwi.de/" target="_blank" rel="nofollow noreferrer"
-              >BMWi</a
-            >
-            in the
-            <a
-              href="https://www.cs7.tf.fau.eu/2021/11/01/new-researchproject-quicsat/"
-              target="_blank"
-              >QUICSAT project</a
-            >. A pre-print paper is available on
-            <a
-              href="https://arxiv.org/abs/2202.08228"
-              target="_blank"
-              rel="nofollow noreferrer"
-              >arxiv.org</a
-            >
-            and a more verbose master's thesis is available
-            <a href="thesis.pdf">here</a>.
-          </p>
-        </small>
       </section>
+
+      <hr />
+
+      <small class="text-muted">
+        <p>
+          This work has been supported by the
+          <a href="https://bmwi.de/" target="_blank" rel="nofollow noreferrer"
+            >BMWi</a
+          >
+	  on the basis of a decision by the German Bundestag
+          It is part of the
+          <a
+            href="https://www.cs7.tf.fau.eu/2021/11/01/new-researchproject-quicsat/"
+            target="_blank"
+            >QUICSAT project</a
+          >. A pre-print paper is available on
+          <a
+            href="https://arxiv.org/abs/2202.08228"
+            target="_blank"
+            rel="nofollow noreferrer"
+            >arxiv.org</a
+          >
+          and a more verbose master's thesis is available
+          <a href="thesis.pdf">here</a>.
+          Please cite the paper to reference this work.
+          <img src="./bmwk-logo.svg" alt="" style="height:4rem;" />
+        </p>
+      </small>
 
       <h3 class="mt-5">Results Filter</h3>
 
